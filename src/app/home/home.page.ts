@@ -8,7 +8,8 @@ declare var SMSReceive: any;
   styleUrls: ['home.page.scss'],
 })
 export class HomePage {
-  message: string = '';
+  events: any[] = [];
+  isWatching: boolean = false;
   constructor(
     private toastCtrl: ToastController
   ) { }
@@ -22,30 +23,52 @@ export class HomePage {
     toast.present();
   }
 
-  next() {
-    this.start();
-  }
-
   start() {
+    this.addEvent('starting ...')
     SMSReceive.startWatch(
       () => {
+        this.addEvent('watch started');
+        this.isWatching = true;
         document.addEventListener('onSMSArrive', (e: any) => {
           var incomingSms = e.data;
+          this.addEvent(JSON.stringify(incomingSms));
           this.processSMS(incomingSms);
         })
       },
-      () => { console.log('start railed') });
+      () => {
+        this.addEvent('start failed')
+        console.log('start failed')
+      });
+  }
+
+
+  addEvent(event: string) {
+    this.events.push(this.getCurrentTime() + ' : ' + event);
+  }
+
+  getCurrentTime(): string {
+    const currentDate = new Date();
+    const localDateTimeString = currentDate.toLocaleString();
+    return localDateTimeString;
   }
 
   stop() {
+    this.addEvent('stopping ...')
     SMSReceive.stopWatch(
-      () => { console.log('watch stopped') },
-      () => { console.log('watch stop failed') }
+      () => {
+        this.isWatching = false;
+        this.addEvent('watch stopped');
+        console.log('watch stopped');
+      },
+      () => {
+        this.addEvent('watch stop failed')
+        console.log('watch stop failed')
+      }
     )
   }
 
-  processSMS(data: { body: string | any[]; }) {
+  processSMS(data: any) {
     const message = data.body;
-    this.presentToast(message, 'top', 1500);
+    this.addEvent(message);
   }
 }
