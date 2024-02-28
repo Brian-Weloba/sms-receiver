@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AndroidPermissions } from '@ionic-native/android-permissions/ngx';
+import { AndroidPermissions } from '@awesome-cordova-plugins/android-permissions/ngx';
 import { ToastController } from '@ionic/angular';
 declare var SMSReceive: any;
 
