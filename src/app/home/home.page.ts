@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { AndroidPermissions } from '@ionic-native/android-permissions/ngx';
 import { ToastController } from '@ionic/angular';
 declare var SMSReceive: any;
 
@@ -11,7 +12,8 @@ export class HomePage {
   events: any[] = [];
   isWatching: boolean = false;
   constructor(
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private androidPermissions: AndroidPermissions
   ) { }
 
   async presentToast(message: any, position: any, duration: any) {
@@ -21,6 +23,36 @@ export class HomePage {
       duration: duration
     });
     toast.present();
+  }
+
+  checkSMSPermission() {
+    this.androidPermissions.checkPermission(this.androidPermissions.PERMISSION.RECEIVE_SMS)
+      .then((result) => {
+        if (result.hasPermission) {
+          console.log('SMS permission is granted');
+          this.start(); // Start SMS watch if permission is already granted
+        } else {
+          console.log('SMS permission is not granted');
+          this.requestSMSPermissions(); // Request permission if not granted
+        }
+      })
+      .catch((error) => {
+        console.error('Error checking SMS permission', error);
+        // Handle error
+      });
+  }
+
+  requestSMSPermissions() {
+    this.androidPermissions.requestPermission(this.androidPermissions.PERMISSION.RECEIVE_SMS)
+      .then(() => {
+        this.addEvent('SMS permission granted');
+        console.log('SMS permission granted');
+        this.start(); // Start SMS watch after permission is granted
+      }).catch(error => {
+        this.addEvent('SMS permission granted' + error);
+        console.log('Error requesting SMS permission', error);
+        // Handle error or inform the user
+      })
   }
 
   start() {
@@ -40,7 +72,6 @@ export class HomePage {
         console.log('start failed')
       });
   }
-
 
   addEvent(event: string) {
     this.events.push(this.getCurrentTime() + ' : ' + event);
