@@ -1,0 +1,7 @@
+{
+  "name": "sms receiver",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
